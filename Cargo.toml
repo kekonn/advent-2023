@@ -1,0 +1,63 @@
+[workspace]
+members = ["."]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+repository = "https://github.com/kekkon/app-template"
+keywords = []
+categories = []
+authors = ["Jonas Van der Aa <jonas@vdaa.website>"]
+license-file = "LICENSE"
+include = [
+    "**/*.rs",
+    "**/*.md",
+    "LICENSE",
+    "Cargo.toml"
+    ]
+
+[package.metadata.binstall]
+
+[package]
+description = "Describe your application"
+name = "app-template"
+version.workspace = true
+license-file.workspace = true
+edition.workspace = true
+authors.workspace = true
+repository.workspace = true
+
+[features]
+default = []
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+# Add simple dependencies for the entire workspace here
+[workspace.dependencies]
+
+[workspace.dependencies.tokio]
+version = "1"
+features = ["full"]
+
+# Config for 'cargo dist'
+[workspace.metadata.dist]
+# The preferred cargo-dist version to use in CI (Cargo.toml SemVer syntax)
+cargo-dist-version = "0.4.0"
+# CI backends to support
+ci = ["github"]
+# The installers to generate for each app
+installers = []
+# Target platforms to build apps for (Rust target-triple syntax)
+targets = ["x86_64-unknown-linux-gnu"]
+# Publish jobs to run in CI
+pr-run-mode = "plan"
+
+# Define optimisations for release builds
+[profile.release]
+opt-level = "s"
+lto = true
+codegen-units = 1
+
+[profile.dist]
+inherits = "release"
+lto = "thin"
