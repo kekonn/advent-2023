@@ -30,10 +30,15 @@ repository.workspace = true
 [features]
 default = []
 
+[dependencies]
+tokio ={ workspace = true }
+anyhow ={ workspace = true }
+
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 # Add simple dependencies for the entire workspace here
 [workspace.dependencies]
+anyhow = "1"
 
 [workspace.dependencies.tokio]
 version = "1"
