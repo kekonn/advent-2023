@@ -1,5 +1,5 @@
-# app-template
-A repo that serves as a jumping off point for my rust projects
+# Advent of Code 2023
+This is where I'll post my solutions for Advent of Code 2023
 
 ## Template Instructions
 - Replace app-template in all urls and documents with the project name

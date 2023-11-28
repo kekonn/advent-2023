@@ -4,7 +4,7 @@ members = ["."]
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-repository = "https://github.com/kekkon/app-template"
+repository = "https://github.com/kekkon/advent-2023"
 keywords = []
 categories = []
 authors = ["Jonas Van der Aa <jonas@vdaa.website>"]
@@ -20,7 +20,7 @@ include = [
 
 [package]
 description = "Describe your application"
-name = "app-template"
+name = "advent-2023"
 version.workspace = true
 license-file.workspace = true
 edition.workspace = true

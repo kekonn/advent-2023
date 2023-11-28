@@ -1,4 +1,4 @@
-# app-template
+# Advent of Code 2023
 
 <!-- next-header -->
 
@@ -12,4 +12,4 @@
 
 
 <!-- next-url -->
-[Unreleased]: https://github.com/kekonn/app-template/compare/v0.0.0...HEAD
+[Unreleased]: https://github.com/kekonn/advent-2023/compare/v0.0.0...HEAD
