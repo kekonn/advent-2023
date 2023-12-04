@@ -1,8 +1,6 @@
-use std::collections::HashMap;
+use std::{ collections::HashMap, ops::Range };
 
-use anyhow::Result;
-use tokio::io::{ AsyncBufRead, AsyncRead, AsyncBufReadExt, BufReader };
-use regex::Regex;
+use tokio::io::{ AsyncRead, AsyncBufReadExt, BufReader };
 
 static NUM_MAP: [(&str, &str); 9] = [
     ("one", "1"),
@@ -15,7 +13,6 @@ static NUM_MAP: [(&str, &str); 9] = [
     ("eight", "8"),
     ("nine", "9"),
 ];
-const REGEX: &str = "(one|two|three|four|five|six|seven|eight|nine)";
 
 pub async fn day1(data: impl AsyncRead + Unpin) -> u32 {
     // Convert file to buffered line by line access
@@ -23,39 +20,54 @@ pub async fn day1(data: impl AsyncRead + Unpin) -> u32 {
         let reader = BufReader::new(data);
         reader.lines()
     };
-    let mut nums = Vec::<u32>::new();
-    let regex = Regex::new(REGEX).unwrap();
-    let dictionary = HashMap::from(NUM_MAP);
+
+    let mut nums = Vec::<u32>::new(); // all numbers found on each line
+    let dictionary = HashMap::from(NUM_MAP); // a dictionary that helps convert spelled numbers to digits
 
     while let Ok(Some(line)) = lines.next_line().await {
-        let line = {
-            let line = line;let regex = &regex;let dictionary = &dictionary;
-            let line = line.trim().to_owned();
-            let mut line_output = line.clone();
+        // line per line handling
+        let line = line.trim().to_owned();
+        let mut output_line = line.clone();
 
-            let matches = regex.find_iter(&line);
-            for rmatch in matches {
-                let matched_str = rmatch.as_str();
-                line_output = line_output.replace(matched_str, dictionary[matched_str]);
-            }
+        // find all spelled digits and their location
+        let mut spelled_found = dictionary
+            .keys()
+            .filter_map(|k| line.find(*k).map(|s| (s..s + k.len(), *k)))
+            .collect::<Vec<(Range<usize>, &str)>>();
+        spelled_found.sort_by(|(i1, _), (i2, _)| i1.start.cmp(&i2.start));
 
-            line_output
-        };
-        nums.push({
-            let line: &str = &line;
-            let line_digits: Vec<char> = line
-                .chars()
-                .filter(|c| c.is_ascii_digit())
+        while let Some((location, word)) = spelled_found.pop() {
+            let overlapping: Vec<&(Range<usize>, &str)> = spelled_found
+                .iter()
+                .filter(|(loc, _)| (location.contains(&loc.start) || location.contains(&loc.end)))
                 .collect();
 
-            let num_digits = format!(
-                "{}{}",
-                line_digits.first().unwrap_or(&'0'),
-                line_digits.last().unwrap_or(&'0')
-            );
+            let mut location = location;
+            for (overlap, _) in overlapping {
+                location = match (location.contains(&overlap.start), location.contains(&overlap.end)) {
+                    (true, false) => location.start..overlap.start,
+                    (false, true) => overlap.end..location.end,
+                    _ => location,
+                };
+            }
 
-            Ok(num_digits.parse::<u32>()?)
-        }.unwrap());
+            // We now have the minimum range to replace
+            output_line.replace_range(location, dictionary[word]);
+        }
+
+        // select all characters that represent digits
+        let line_digits: Vec<char> = output_line
+            .chars()
+            .filter(|c| c.is_ascii_digit())
+            .collect();
+        // make string with first and last digit of current line
+        let num_digits = format!(
+            "{}{}",
+            line_digits.first().unwrap_or(&'0'),
+            line_digits.last().unwrap_or(&'0')
+        );
+
+        nums.push(num_digits.parse::<u32>().expect("num_digits should represent a valid number"));
     }
 
     nums.iter().sum()
@@ -80,7 +92,7 @@ mod test {
     7pqrstsixteen
     "#;
 
-    const DAY1_PT2_TEST: &str = "nineight";
+    const DAY1_PT2_TEST: &str = "sevenineight";
 
     /// result should be 142
     #[tokio::test]
@@ -107,6 +119,6 @@ mod test {
 
         let result = super::day1(str_reader).await;
 
-        assert_eq!(98, result);
+        assert_eq!(78, result);
     }
 }
