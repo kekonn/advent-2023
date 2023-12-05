@@ -1,4 +1,4 @@
-use std::{ collections::HashMap, ops::Range };
+use std::{collections::HashMap, ops::Add, str::Matches};
 
 use tokio::io::{ AsyncRead, AsyncBufReadExt, BufReader };
 
@@ -30,29 +30,19 @@ pub async fn day1(data: impl AsyncRead + Unpin) -> u32 {
         let mut output_line = line.clone();
 
         // find all spelled digits and their location
-        let mut spelled_found = dictionary
-            .keys()
-            .filter_map(|k| line.find(*k).map(|s| (s..s + k.len(), *k)))
-            .collect::<Vec<(Range<usize>, &str)>>();
-        spelled_found.sort_by(|(i1, _), (i2, _)| i1.start.cmp(&i2.start));
+        let spelled_found = dictionary.keys().map(|k| line.match_indices(*k))
+            .fold(HashMap::<&str, usize>::new(), |mut map, m| {
+                let mranges = m.map(|mi| mi.0..(mi.0 + mi.1.len()));
+                let mkey = m.fold("",|_,m| m.1);
 
-        while let Some((location, word)) = spelled_found.pop() {
-            let overlapping: Vec<&(Range<usize>, &str)> = spelled_found
-                .iter()
-                .filter(|(loc, _)| (location.contains(&loc.start) || location.contains(&loc.end)))
-                .collect();
+                map.entry(mkey).or_insert(mranges);
 
-            let mut location = location;
-            for (overlap, _) in overlapping {
-                location = match (location.contains(&overlap.start), location.contains(&overlap.end)) {
-                    (true, false) => location.start..overlap.start,
-                    (false, true) => overlap.end..location.end,
-                    _ => location,
-                };
-            }
+                map
+            });
 
-            // We now have the minimum range to replace
-            output_line.replace_range(location, dictionary[word]);
+        
+        for (word, count) in spelled_found {
+            
         }
 
         // select all characters that represent digits
@@ -92,7 +82,7 @@ mod test {
     7pqrstsixteen
     "#;
 
-    const DAY1_PT2_TEST: &str = "sevenineight";
+    const DAY1_PT2_TEST: &str = "sevenineightseven  ";
 
     /// result should be 142
     #[tokio::test]
@@ -119,6 +109,6 @@ mod test {
 
         let result = super::day1(str_reader).await;
 
-        assert_eq!(78, result);
+        assert_eq!(77, result);
     }
 }

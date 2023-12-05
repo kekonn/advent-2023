@@ -5,8 +5,8 @@ mod day1;
 async fn main() -> anyhow::Result<()> {
     println!("---------- Day 1 ----------");
     {
-        let pt2_input = tokio::fs::File::open("data/day1.txt").await.expect("Error opening day1 input");
-        println!("Result: {}", day1::day1(pt2_input).await);
+        let input = tokio::fs::File::open("data/day1.txt").await.expect("Error opening day1 input");
+        println!("Result: {}", day1::day1(input).await);
     }
     println!("---------------------------");
 
