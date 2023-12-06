@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ops::Add, str::Matches};
+use std::{ collections::HashMap, ops::Range, str::Matches };
 
 use tokio::io::{ AsyncRead, AsyncBufReadExt, BufReader };
 
@@ -13,6 +13,8 @@ static NUM_MAP: [(&str, &str); 9] = [
     ("eight", "8"),
     ("nine", "9"),
 ];
+
+const SPELLED_PAT: &str = "(one|two|three|four|five|six|seven|eight|nine)";
 
 pub async fn day1(data: impl AsyncRead + Unpin) -> u32 {
     // Convert file to buffered line by line access
@@ -30,19 +32,21 @@ pub async fn day1(data: impl AsyncRead + Unpin) -> u32 {
         let mut output_line = line.clone();
 
         // find all spelled digits and their location
-        let spelled_found = dictionary.keys().map(|k| line.match_indices(*k))
-            .fold(HashMap::<&str, usize>::new(), |mut map, m| {
-                let mranges = m.map(|mi| mi.0..(mi.0 + mi.1.len()));
-                let mkey = m.fold("",|_,m| m.1);
+        let spelled_found = dictionary.keys().map(|k| line.matches(*k))
+            .filter(|m| m.clone().count() > 0)
+            .fold(HashMap::<&str, usize>::new(), |mut map, i| {
+                let matches: Vec<&str> = i.collect();
+                let match_count = matches.len();
+                let key = matches[0];
 
-                map.entry(mkey).or_insert(mranges);
+                map.insert(key, match_count);
 
                 map
             });
-
         
+        // this solution doesn't account for overlapping 
         for (word, count) in spelled_found {
-            
+            output_line = output_line.replacen(word, dictionary[word], count);
         }
 
         // select all characters that represent digits
