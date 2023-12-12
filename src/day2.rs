@@ -20,17 +20,17 @@ impl Debug for Hand {
 }
 
 fn str2counts(hand_str: &str) -> Hand {
-    let mut raw_hand = hand_str.split(',')
+    let raw_hand: Vec<(String, u16)> = hand_str.split(',')
             .map(|s| {
                 let num = s.chars().filter(|c| c.is_ascii_digit()).collect::<String>().parse::<u16>().unwrap();
                 let color = s.chars().filter(|c| c.is_alphabetic()).collect::<String>();
 
                 (color, num)
-            });
+            }).collect();
 
-    let (_,green_count) = raw_hand.find(|h| h.0.eq_ignore_ascii_case("green")).unwrap_or(("green".into(), 0));
-    let (_,red_count) = raw_hand.find(|h| h.0.eq_ignore_ascii_case("red")).unwrap_or(("red".into(), 0));
-    let (_,blue_count) = raw_hand.find(|h| h.0.eq_ignore_ascii_case("blue")).unwrap_or(("blue".into(), 0));
+    let &(_,red_count) = raw_hand.iter().find(|&h| h.0.eq_ignore_ascii_case("red")).unwrap_or(&("red".into(), 0));
+    let &(_,green_count) = raw_hand.iter().find(|&h| h.0.eq_ignore_ascii_case("green")).unwrap_or(&("green".into(), 0));
+    let &(_,blue_count) = raw_hand.iter().find(|&h| h.0.eq_ignore_ascii_case("blue")).unwrap_or(&("blue".into(), 0));
 
     Hand { red_count, green_count, blue_count }
 }
@@ -48,6 +48,43 @@ pub fn day2(file: impl Read, (red_limit, green_limit, blue_limit): (u16, u16, u1
     }
 
     accepted_games.iter().map(|g| g.game_num).sum()
+}
+
+pub fn day2_pt2(file: impl Read) -> u64 {
+    let reader = BufReader::new(file);
+    let mut lines = reader.lines();
+    let mut powers = Vec::<u64>::new();
+
+    while let Some(Ok(line)) = lines.next() {
+        let game = parse_game(&line);
+        let power = get_game_power(&game);
+
+        powers.push(power);
+    }
+
+    powers.iter().sum()
+}
+
+fn get_game_power(game: &Game) -> u64 {
+    let hands = &game.hands;
+
+    let (highest_red, highest_green, highest_blue) = hands.iter().fold((0,0,0), |mut s, h| {
+        if h.red_count as u64 > s.0 {
+            s.0 = h.red_count as u64;
+        }
+
+        if h.green_count as u64 > s.1 {
+            s.1 = h.green_count as u64;
+        }
+
+        if h.blue_count as u64 > s.2 {
+            s.2 = h.blue_count as u64;
+        }
+
+        s
+    });
+
+    highest_red * highest_green * highest_blue
 }
 
 fn parse_game(line: &str) -> Game {
@@ -70,6 +107,7 @@ mod tests {
     Game 4: 1 green, 3 red, 6 blue; 3 green, 6 red; 3 green, 15 blue, 14 red
     Game 5: 6 red, 1 blue, 3 green; 2 blue, 1 red, 2 green"#;
 
+    const TEST_INPUT: &str = "Game 1: 1 green, 2 blue; 15 blue, 12 red, 2 green; 4 red, 6 blue; 10 blue, 8 red; 3 red, 12 blue; 1 green, 12 red, 8 blue";
 
     #[test]
     fn day2() {
@@ -78,5 +116,22 @@ mod tests {
         let res = super::day2(input, (12,13,14));
 
         assert_eq!(8, res);
+    }
+
+    #[test]
+    fn day2_pt2() {
+        let input = BufReader::new(DAY2_INPUT.as_bytes());
+
+        let power_sum = super::day2_pt2(input);
+
+        assert_eq!(2286, power_sum);
+    }
+
+    #[test]
+    fn input_test() {
+        let game = super::parse_game(TEST_INPUT);
+
+        assert_eq!(6, game.hands.len());
+        assert_eq!(1, game.game_num);
     }
 }
