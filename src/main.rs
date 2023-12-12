@@ -19,7 +19,8 @@ async fn main() -> anyhow::Result<()> {
     }
     println!("---------- Pt. 2 ----------");
     {
-        
+        let input = std::fs::File::open("data/day2.txt").expect("Error opening day2 input");
+        println!("Result: {}", day2::day2_pt2(input));
     }
     println!("---------------------------");
     Ok(())
