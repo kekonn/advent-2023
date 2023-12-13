@@ -1,5 +1,7 @@
 use std::{io::{Read, BufRead, BufReader}, fmt::Debug};
 
+use crate::util;
+
 
 #[derive(Debug)]
 struct Game {
@@ -36,8 +38,7 @@ fn str2counts(hand_str: &str) -> Hand {
 }
 
 pub fn day2(file: impl Read, (red_limit, green_limit, blue_limit): (u16, u16, u16)) -> u32 {
-    let reader = BufReader::new(file);
-    let mut lines = reader.lines();
+    let mut lines = util::read_lines(file);
     let mut accepted_games = Vec::<Game>::new();
 
     while let Some(Ok(line)) = lines.next() {
@@ -99,7 +100,7 @@ fn parse_game(line: &str) -> Game {
 
 #[cfg(test)]
 mod tests {
-    use std::io::BufReader;
+    use crate::util;
 
     const DAY2_INPUT: &str = r#"Game 1: 3 blue, 4 red; 1 red, 2 green, 6 blue; 2 green
     Game 2: 1 blue, 2 green; 3 green, 4 blue, 1 red; 1 green, 1 blue
@@ -111,7 +112,7 @@ mod tests {
 
     #[test]
     fn day2() {
-        let input = BufReader::new(DAY2_INPUT.as_bytes());
+        let input = util::str2reader(DAY2_INPUT);
 
         let res = super::day2(input, (12,13,14));
 
@@ -120,7 +121,7 @@ mod tests {
 
     #[test]
     fn day2_pt2() {
-        let input = BufReader::new(DAY2_INPUT.as_bytes());
+        let input = util::str2reader(DAY2_INPUT);
 
         let power_sum = super::day2_pt2(input);
 

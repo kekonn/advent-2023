@@ -1,7 +1,11 @@
+
+mod util;
 /// https://adventofcode.com/2023/day/1
 mod day1;
 /// https://adventofcode.com/2023/day/2
 mod day2;
+/// https://adventofcode.com/2023/day/3
+mod day3;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -23,5 +27,12 @@ async fn main() -> anyhow::Result<()> {
         println!("Result: {}", day2::day2_pt2(input));
     }
     println!("---------------------------");
+    println!("---------- Day 3 ----------");
+    {
+        let input = std::fs::File::open("data/day3.txt").expect("Error opening day3 input");
+        todo!()
+    }
+    println!("---------------------------");
+
     Ok(())
 }
